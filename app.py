@@ -201,7 +201,7 @@ def generate_real_ai_feedback(essay_text, scores):
 
         # 使用新的OpenAI客户端格式（支持第三方API）
         client = openai.OpenAI(
-            api_key="sk-FjhSEAEvO08o2YgHoVNeKzQPPtLY7GXQPgA4BLp6Rk0lizsq",
+            api_key="YOUR_API_KEY",
             base_url="https://zzzzapi.com/v1"
         )
 
