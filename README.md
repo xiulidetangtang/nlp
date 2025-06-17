@@ -10,4 +10,4 @@ this is for Fudan nlp final task
 ### 环境准备
 ```bash
 pip install flask flask-cors torch transformers openai numpy
-'''
+```
