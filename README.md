@@ -1,9 +1,13 @@
 # nlp
 this is for Fudan nlp final task
-To use the model first create env like this
-'''conda create -n essay_scoring python=3.12
-conda activate essay_scoring
 
-# 安装基础依赖
-pip install flask flask-cors torch transformers
-pip install -r requirements.txt'''
+# 英语写作评分系统
+
+基于DeBERTa+BiLSTM的英语作文自动评分系统，提供六维度评分和AI反馈。
+
+## 快速开始
+
+### 环境准备
+```bash
+pip install flask flask-cors torch transformers openai numpy
+'''
