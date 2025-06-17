@@ -11,3 +11,17 @@ this is for Fudan nlp final task
 ```bash
 pip install flask flask-cors torch transformers openai numpy
 ```
+### 启动后端
+```
+python app.py
+```
+### 启动前段
+```
+python -m htttp.server 8080
+```
+### 打开网页
+```
+http://localhost:8080
+```
+### 配置api
+在app.py 中修改api-key，就可以实现对大模型的调用
