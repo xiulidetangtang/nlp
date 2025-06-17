@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Language Learner Essay Scoring & Feedback System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: #4facfe;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168, 237, 234, 0.3);
+        }
+
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transform: scale(0);
+            animation: scoreAppear 0.6s ease forwards;
+        }
+
+        .score-card:nth-child(2) { animation-delay: 0.1s; }
+        .score-card:nth-child(3) { animation-delay: 0.2s; }
+        .score-card:nth-child(4) { animation-delay: 0.3s; }
+        .score-card:nth-child(5) { animation-delay: 0.4s; }
+        .score-card:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes scoreAppear {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .feedback-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-content {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sample-essays {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .sample-essay {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .sample-essay:hover {
+            transform: translateX(5px);
+        }
+
+        .sample-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .sample-preview {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .scores-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .scores-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 English Language Learner Essay Scoring System</h1>
+            <p>AI-Powered Writing Assessment with Detailed Feedback for 8th-12th Grade Students</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                    Submit Your Essay
+                </h2>
+
+                <textarea id="essayInput" placeholder="Paste your essay here... Write about any topic you're passionate about. The system will evaluate your writing across six key dimensions: cohesion, syntax, vocabulary, phraseology, grammar, and conventions.
+
+Example topics:
+• The importance of environmental protection
+• How technology has changed education
+• Describe a person who has influenced your life
+• The benefits and challenges of social media
+
+Remember to:
+- Write at least 150-300 words
+- Use clear paragraph structure
+- Support your ideas with examples
+- Check your spelling and grammar"></textarea>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="analyzeEssay()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,11 12,14 22,4"></polyline>
+                            <path d="M21,12v7a2,2 0 0,1 -2,2H5a2,2 0 0,1 -2,-2V5a2,2 0 0,1 2,-2h11"></path>
+                        </svg>
+                        Analyze Essay
+                    </button>
+                    <button class="btn-secondary" onclick="getDetailedFeedback()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21,15a2,2 0 0,1 -2,2H7l-4,4V5a2,2 0 0,1 2,-2H19a2,2 0 0,1 2,2z"></path>
+                        </svg>
+                        Get AI Feedback
+                    </button>
+                </div>
+
+                <div class="sample-essays">
+                    <h3 style="margin-bottom: 15px; color: #333;">📝 Sample Essays</h3>
+                    <div class="sample-essay" onclick="loadSample(0)">
+                        <div class="sample-title">Environmental Protection Essay</div>
+                        <div class="sample-preview">A well-structured essay about climate change and personal responsibility...</div>
+                    </div>
+                    <div class="sample-essay" onclick="loadSample(1)">
+                        <div class="sample-title">Technology in Education</div>
+                        <div class="sample-preview">Exploring how digital tools transform learning experiences...</div>
+                    </div>
+                    <div class="sample-essay" onclick="loadSample(2)">
+                        <div class="sample-title">Personal Influence Essay</div>
+                        <div class="sample-preview">A reflective piece about a teacher who made a difference...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2 class="section-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M3,3V21H21V3H3M18,18H6V17H18V18M18,16H6V15H18V16M18,14H6V13H18V14M18,12H6V11H18V12M18,10H6V9H18V10M18,8H6V7H18V8M18,6H6V5H18V6Z"/>
+                    </svg>
+                    Assessment Results
+                </h2>
+
+                <div id="loadingIndicator" class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing your essay with DeBERTa+BiLSTM model...</p>
+                </div>
+
+                <div id="scoresContainer" style="display: none;">
+                    <div class="scores-grid">
+                        <div class="score-card">
+                            <div class="score-label">Cohesion</div>
+                            <div class="score-value" id="cohesionScore">-</div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">Syntax</div>
+                            <div class="score-value" id="syntaxScore">-</div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">Vocabulary</div>
+                            <div class="score-value" id="vocabularyScore">-</div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">Phraseology</div>
+                            <div class="score-value" id="phraseologyScore">-</div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">Grammar</div>
+                            <div class="score-value" id="grammarScore">-</div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">Conventions</div>
+                            <div class="score-value" id="conventionsScore">-</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="scoresChart" width="400" height="200"></canvas>
+                    </div>
+
+                    <div class="feedback-section">
+                        <h3 class="feedback-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <circle cx="12" cy="17" r="1"></circle>
+                            </svg>
+                            AI-Generated Detailed Feedback
+                        </h3>
+                        <div class="feedback-content" id="feedbackContent">
+                            Click "Get AI Feedback" to receive personalized suggestions for improving your essay.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="placeholderMessage" style="text-align: center; color: #666; padding: 40px;">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 20px; opacity: 0.5;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10,9 9,9 8,9"></polyline>
+                    </svg>
+                    <h3>Ready to Analyze Your Writing</h3>
+                    <p>Submit your essay to get comprehensive scores and personalized feedback from the trained model.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        const sampleEssays = [
+            `Environmental protection has become one of the most critical issues of our time. As global temperatures rise and natural disasters become more frequent, it is clear that we must take immediate action to protect our planet for future generations.
+
+            Climate change affects every aspect of our lives, from the food we eat to the air we breathe. Rising sea levels threaten coastal communities, while extreme weather patterns disrupt agriculture and water supplies. The consequences of inaction will be devastating, not only for the environment but also for human society and the global economy.
+
+            However, protecting the environment is not just the responsibility of governments and large corporations. Each individual has a role to play in creating a sustainable future. Simple actions like reducing energy consumption, recycling, and choosing eco-friendly products can make a significant difference when adopted by millions of people worldwide.
+
+            In conclusion, environmental protection requires both collective action and individual responsibility. By working together and making conscious choices in our daily lives, we can help ensure that future generations inherit a healthy and sustainable planet.`,
+
+            `Technology has revolutionized education in ways that were unimaginable just a few decades ago. From interactive whiteboards to online learning platforms, digital tools have transformed how students learn and teachers teach, creating new opportunities for engagement and personalized instruction.
+
+            One of the most significant benefits of technology in education is accessibility. Online courses and digital resources have made quality education available to students regardless of their geographical location or economic circumstances. Students in remote areas can now access the same educational content as those in major cities, breaking down traditional barriers to learning.
+
+            Furthermore, technology enables personalized learning experiences that adapt to each student's unique needs and learning style. Adaptive learning software can identify areas where students struggle and provide additional practice, while advanced learners can move ahead at their own pace. This individualized approach helps ensure that no student is left behind.
+
+            However, the integration of technology in education also presents challenges. Not all students have equal access to devices and internet connectivity, creating a digital divide that can exacerbate educational inequalities. Additionally, the overuse of technology can lead to decreased face-to-face interaction and potential distractions in the classroom.
+
+            Despite these challenges, the benefits of educational technology far outweigh the drawbacks. As we continue to develop and refine these tools, it is essential to ensure that they are used thoughtfully and equitably to enhance learning for all students.`,
+
+            `Throughout my life, many people have influenced my personal growth and development, but none more significantly than my seventh-grade English teacher, Mrs. Rodriguez. Her dedication, enthusiasm, and unwavering belief in her students' potential transformed not only my academic performance but also my entire outlook on learning and life.
+
+            When I first entered Mrs. Rodriguez's classroom, I was a shy and reluctant student who struggled with writing and lacked confidence in expressing my ideas. My previous experiences with English had been frustrating, and I had convinced myself that I was simply not good at the subject. However, Mrs. Rodriguez saw potential in me that I didn't even know existed.
+
+            Rather than focusing on my mistakes, she celebrated my small victories and encouraged me to take creative risks in my writing. She introduced me to authors and poets who wrote about experiences similar to my own, helping me realize that my voice and perspective were valuable. Through her patient guidance and constructive feedback, I gradually developed the skills and confidence to express myself effectively through writing.
+
+            Beyond academics, Mrs. Rodriguez taught me important life lessons about perseverance, self-belief, and the power of education to transform lives. She often stayed after school to provide extra help and would write encouraging notes on my assignments that motivated me to keep improving. Her classroom became a safe space where I felt valued and supported.
+
+            The impact of Mrs. Rodriguez's influence extends far beyond my middle school years. Her belief in my abilities gave me the confidence to pursue challenging courses in high school and eventually led to my decision to study literature in college. More importantly, she taught me to see education as a lifelong journey of discovery and growth rather than merely a series of requirements to fulfill.`
+        ];
+
+        function loadSample(index) {
+            document.getElementById('essayInput').value = sampleEssays[index];
+        }
+
+        async function analyzeEssay() {
+            const essayText = document.getElementById('essayInput').value.trim();
+
+            if (!essayText) {
+                alert('Please enter an essay to analyze.');
+                return;
+            }
+
+            if (essayText.length < 50) {
+                alert('Please enter a longer essay (at least 50 characters) for accurate analysis.');
+                return;
+            }
+
+            // Show loading indicator
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('scoresContainer').style.display = 'none';
+            document.getElementById('placeholderMessage').style.display = 'none';
+
+            try {
+                // Call real API
+                const response = await fetch('http://127.0.0.1:5000/api/score_essay', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: essayText })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayScores(data.scores);
+                    createChart(data.scores);
+                    window.currentScores = data.scores; // Store for feedback generation
+
+                    // Show success message
+                    showMessage(`Essay analyzed successfully! Overall score: ${data.overall_score}`, 'success');
+                } else {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('scoresContainer').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error analyzing essay:', error);
+                showMessage(`Error connecting to scoring model: ${error.message}. Please ensure the Flask server is running on http://127.0.0.1:5000`, 'error');
+
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('placeholderMessage').style.display = 'block';
+            }
+        }
+
+        function displayScores(scores) {
+            document.getElementById('cohesionScore').textContent = scores.cohesion.toFixed(2);
+            document.getElementById('syntaxScore').textContent = scores.syntax.toFixed(2);
+            document.getElementById('vocabularyScore').textContent = scores.vocabulary.toFixed(2);
+            document.getElementById('phraseologyScore').textContent = scores.phraseology.toFixed(2);
+            document.getElementById('grammarScore').textContent = scores.grammar.toFixed(2);
+            document.getElementById('conventionsScore').textContent = scores.conventions.toFixed(2);
+        }
+
+        function createChart(scores) {
+            const ctx = document.getElementById('scoresChart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Cohesion', 'Syntax', 'Vocabulary', 'Phraseology', 'Grammar', 'Conventions'],
+                    datasets: [{
+                        label: 'Your Scores',
+                        data: [scores.cohesion, scores.syntax, scores.vocabulary, scores.phraseology, scores.grammar, scores.conventions],
+                        backgroundColor: 'rgba(79, 172, 254, 0.2)',
+                        borderColor: 'rgba(79, 172, 254, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(79, 172, 254, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 5,
+                            min: 0,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        async function getDetailedFeedback() {
+            const essayText = document.getElementById('essayInput').value.trim();
+
+            if (!essayText) {
+                alert('Please enter an essay first to get feedback.');
+                return;
+            }
+
+            if (!window.currentScores) {
+                alert('Please analyze your essay first before getting feedback.');
+                return;
+            }
+
+            const feedbackContent = document.getElementById('feedbackContent');
+            feedbackContent.innerHTML = '<div style="display: flex; align-items: center; gap: 10px;"><div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>Generating personalized feedback using AI...</div>';
+
+            try {
+                // Call real API for detailed feedback
+                const response = await fetch('http://127.0.0.1:5000/api/generate_feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: essayText,
+                        scores: window.currentScores || {}
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    feedbackContent.innerHTML = data.feedback;
+                } else {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+
+            } catch (error) {
+                console.error('Error generating feedback:', error);
+                feedbackContent.innerHTML = `<div class="error-message">Error generating AI feedback: ${error.message}. Please ensure the Flask server is running and try again.</div>`;
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageClass = type === 'error' ? 'error-message' : 'success-message';
+            const messageDiv = document.createElement('div');
+            messageDiv.className = messageClass;
+            messageDiv.textContent = message;
+
+            // Insert after the buttons
+            const buttonGroup = document.querySelector('.button-group');
+            buttonGroup.parentNode.insertBefore(messageDiv, buttonGroup.nextSibling);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
+        // Initialize the interface
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Essay Scoring System Initialized - Real Model Mode');
+        });
+    </script>
+</body>
+</html>
